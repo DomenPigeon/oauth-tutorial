@@ -3,8 +3,12 @@
 public class AppSettings
 {
     /// <summary>
-    /// Should look something like: https://dev-xxxxxxx.us.auth0.com/authorize
+    /// Should look something like: https://dev-xxxxxxx.us.auth0.com
     /// </summary>
+    public required string? IssuerUrl { get; set; }
+
+    public required string? TokenEndpoint { get; set; }
+
     public required string? AuthorizationEndpoint { get; set; }
 
     /// <summary>

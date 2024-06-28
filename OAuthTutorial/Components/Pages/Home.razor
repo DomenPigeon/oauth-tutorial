@@ -1,30 +1,54 @@
 ﻿@page "/"
+@using System.Text.Json
 @using Microsoft.Extensions.Options
 @using OAuthTutorial.Code
 @inject IOptions<AppSettings> AppSettings
+@inject RedirectService Service 
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
 <h1>Login</h1>
 
+@if (AppSettings.Value.IssuerUrl is null)
+{
+    <p>
+        You need to configure the @nameof(Code.AppSettings.IssuerUrl) in the appsettings.secrets.json file.
+        Finish <a href="https://oauth.school/exercise/introduction/">this</a> tutorial to get an issuer url.
+    </p>
+}
+else
+{
+    <p>
+        @(nameof(Code.AppSettings.IssuerUrl)): @AppSettings.Value.IssuerUrl
+    </p>
+}
+
 @if (AppSettings.Value.AuthorizationEndpoint is null)
 {
     <p>
         You need to configure the @nameof(Code.AppSettings.AuthorizationEndpoint) in the appsettings.secrets.json file.
-        Finish <a href="https://oauth.school/exercise/introduction/">this</a> tutorial to get an server endpoint.
-    </p>
-}
-else if (!AppSettings.Value.AuthorizationEndpoint.EndsWith("/authorize"))
-{
-    <p>
-        Your link is probably wrong. The @nameof(Code.AppSettings.AuthorizationEndpoint) should end with /authorize.
+        Finish <a href="https://oauth.school/exercise/introduction/">this</a> tutorial to get an authorization endpoint.
     </p>
 }
 else
 {
     <p>
         @(nameof(Code.AppSettings.AuthorizationEndpoint)): @AppSettings.Value.AuthorizationEndpoint
+    </p>
+}
+
+@if (AppSettings.Value.TokenEndpoint is null)
+{
+    <p>
+        You need to configure the @nameof(Code.AppSettings.TokenEndpoint) in the appsettings.secrets.json file.
+        Finish <a href="https://oauth.school/exercise/introduction/">this</a> tutorial to get an token endpoint.
+    </p>
+}
+else
+{
+    <p>
+        @(nameof(Code.AppSettings.TokenEndpoint)): @AppSettings.Value.TokenEndpoint
     </p>
 }
 
@@ -56,7 +80,12 @@ else
     </p>
 }
 
-@if (AppSettings.Value.AuthorizationEndpoint is not null && AppSettings.Value.ClientId is not null && AppSettings.Value.ClientSecret is not null)
+@if (AppSettings.Value.IssuerUrl is not null &&
+     AppSettings.Value.ClientId is not null &&
+     AppSettings.Value.ClientSecret is not null &&
+     AppSettings.Value.AuthorizationEndpoint is not null &&
+     AppSettings.Value.TokenEndpoint is not null
+    )
 {
     <button @onclick="Login">Login into OAuth</button>
 }
@@ -88,19 +117,46 @@ else
         await Add(new($"Code Challenge: {codeChallenge}"));
 
         var settings = AppSettings.Value;
-        var endpoint = settings.AuthorizationEndpoint!;
+        var authorizationEndpoint = AppSettings.Value.AuthorizationEndpoint!;
         var clientId = settings.ClientId!;
         await Add(new("Now we can generate the Authorization Request"));
         await Add(new($"For the redirect uri we will use {settings.RedirectUri}"));
 
-        var request = OAuth.GenerateAuthorizationUri(endpoint, clientId, codeVerifier, settings.RedirectUri, codeChallenge);
+        var request = OAuth.GenerateAuthorizationUri(authorizationEndpoint, clientId, codeVerifier, settings.RedirectUri, codeChallenge);
 
         await Add(new($"Authorization Request: {request}"));
         await Add(new("Now you can click the link to be redirected to the OAuth server."));
-        await Add(new($"<a href='{request}'>Click here to login via OAuth</a>"));
+        await Add(new($"<a href=\"{request}\" target=\"blank\">Click here</a>"));
         await Add(new($"After you will be logged in the server will redirect you back to the redirect uri: {settings.RedirectUri}"));
         await Add(new("Check the LoginController"));
+        await Add(new("<hr/>"));
         await InvokeAsync(StateHasChanged);
+
+        var response = await Service.GetNextRedirectResponseAsync();
+
+        await Add(new($"Got back response: {response}"));
+        await Add(new("Now we need to make a POST request to the Token Endpoint"));
+        await Task.Delay(2000);
+
+        var postRequest = OAuth.GenerateTokenPostRequest(settings.TokenEndpoint!, clientId, settings.ClientSecret!, response.Code, settings.RedirectUri, codeVerifier);
+        var content = await postRequest.Content!.ReadAsStringAsync();
+
+        var serializedRequest = JsonSerializer.Serialize(postRequest, new JsonSerializerOptions { WriteIndented = true });
+        await Add(new($"Token Request content: <pre>\n{serializedRequest}</pre>"));
+        await Add(new($"Token Request content: {content}"));
+        await Add(new("Sending the request in"));
+        await Add(new("3"));
+        await Add(new("2"));
+        await Add(new("1"));
+        await Add(new("Request sent"));
+
+        var client = new HttpClient();
+        var tokenResponse = await client.SendAsync(postRequest);
+
+        var token = await tokenResponse.Content.ReadAsStringAsync();
+
+        await Add(new($"Got back token: {token}"));
+        await Add(new("Now you can use the token to access the server."));
     }
 
     private async Task Add(MarkupString markup)
