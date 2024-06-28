@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OAuthTutorial", "OAuthTutorial\OAuthTutorial.csproj", "{155A792C-45F7-4F08-AF4D-734662CC0BF4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{DA8BE6DD-0C3A-4E6E-A820-2B58B093BCC6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{155A792C-45F7-4F08-AF4D-734662CC0BF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{155A792C-45F7-4F08-AF4D-734662CC0BF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{155A792C-45F7-4F08-AF4D-734662CC0BF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA8BE6DD-0C3A-4E6E-A820-2B58B093BCC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA8BE6DD-0C3A-4E6E-A820-2B58B093BCC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA8BE6DD-0C3A-4E6E-A820-2B58B093BCC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA8BE6DD-0C3A-4E6E-A820-2B58B093BCC6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
