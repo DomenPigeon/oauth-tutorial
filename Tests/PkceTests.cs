@@ -14,4 +14,11 @@ public class PkceTests(ITestOutputHelper testOutputHelper)
             testOutputHelper.WriteLine($"Bytes: {i:00}, Verifier length: {verifier.Length}, Verifier: {verifier}, Challenge: {challenge}");
         }
     }
+
+    [Fact]
+    public void Generate()
+    {
+        var (verifier, challenge) = Pkce.GenerateCodeVerifierAndChallenge();
+        testOutputHelper.WriteLine($"Verifier: {verifier}\nChallenge: {challenge}");
+    }
 }
