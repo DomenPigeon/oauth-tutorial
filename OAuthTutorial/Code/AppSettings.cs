@@ -16,4 +16,6 @@ public class AppSettings
     /// Should look something like: FgEzG44O2QsrTtie2PTm4D6BtEBDQa2o_eOMOp_m8J1Q6yQgJ74zwhSmQ5xwtjaZ
     /// </summary>
     public required string? ClientSecret { get; set; }
+
+    public string RedirectUri { get; set; } = "https://localhost:7206/redirect";
 }

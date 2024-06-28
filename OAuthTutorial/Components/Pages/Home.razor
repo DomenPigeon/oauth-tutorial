@@ -2,6 +2,7 @@
 @using Microsoft.Extensions.Options
 @using OAuthTutorial.Code
 @inject IOptions<AppSettings> AppSettings
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
@@ -12,6 +13,12 @@
     <p>
         You need to configure the @nameof(Code.AppSettings.AuthorizationEndpoint) in the appsettings.secrets.json file.
         Finish <a href="https://oauth.school/exercise/introduction/">this</a> tutorial to get an server endpoint.
+    </p>
+}
+else if (!AppSettings.Value.AuthorizationEndpoint.EndsWith("/authorize"))
+{
+    <p>
+        Your link is probably wrong. The @nameof(Code.AppSettings.AuthorizationEndpoint) should end with /authorize.
     </p>
 }
 else
@@ -49,15 +56,58 @@ else
     </p>
 }
 
+@if (AppSettings.Value.AuthorizationEndpoint is not null && AppSettings.Value.ClientId is not null && AppSettings.Value.ClientSecret is not null)
+{
+    <button @onclick="Login">Login into OAuth</button>
+}
+else
+{
+    <p>
+        Configure the settings to enable the login button.
+    </p>
+}
 
-<button @onclick="Login">Login into OAuth</button>
+@foreach (var step in _loginSteps)
+{
+    <p @key="@step">@step</p>
+}
 
 
 @code {
 
-    private void Login()
+    private readonly List<MarkupString> _loginSteps = new();
+
+    private async Task Login()
     {
-        throw new NotImplementedException();
+        await Add(new("First we need to generate the Authorization Request"));
+        await Add(new("For this we need the Pkce code verifier and challenge"));
+
+        var (codeVerifier, codeChallenge) = Pkce.GenerateCodeVerifierAndChallenge();
+
+        await Add(new($"Code Verifier: {codeVerifier}"));
+        await Add(new($"Code Challenge: {codeChallenge}"));
+
+        var settings = AppSettings.Value;
+        var endpoint = settings.AuthorizationEndpoint!;
+        var clientId = settings.ClientId!;
+        await Add(new("Now we can generate the Authorization Request"));
+        await Add(new($"For the redirect uri we will use {settings.RedirectUri}"));
+
+        var request = OAuth.GenerateAuthorizationUri(endpoint, clientId, codeVerifier, settings.RedirectUri, codeChallenge);
+
+        await Add(new($"Authorization Request: {request}"));
+        await Add(new("Now you can click the link to be redirected to the OAuth server."));
+        await Add(new($"<a href='{request}'>Click here to login via OAuth</a>"));
+        await Add(new($"After you will be logged in the server will redirect you back to the redirect uri: {settings.RedirectUri}"));
+        await Add(new("Check the LoginController"));
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task Add(MarkupString markup)
+    {
+        _loginSteps.Add(markup);
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(100);
     }
 
 }
