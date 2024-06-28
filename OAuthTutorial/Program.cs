@@ -1,7 +1,13 @@
 using Microsoft.AspNetCore.HttpLogging;
+using OAuthTutorial.Code;
 using OAuthTutorial.Components;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddJsonFile("appsettings.secrets.json");
+
+var settings = builder.Configuration.GetSection(nameof(AppSettings));
+builder.Services.Configure<AppSettings>(settings);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -24,9 +30,11 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Configure http requests logging:
 // https://jorgepsmatos.medium.com/asp-net-logging-http-requests-929c3601c909
 // https://www.stevejgordon.co.uk/httpclientfactory-asp-net-core-logging
 app.UseHttpLogging();
+
 app.UseStaticFiles();
 app.UseAntiforgery();
 

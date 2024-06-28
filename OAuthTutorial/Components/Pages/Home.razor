@@ -1,7 +1,63 @@
 ﻿@page "/"
+@using Microsoft.Extensions.Options
+@using OAuthTutorial.Code
+@inject IOptions<AppSettings> AppSettings
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Login</h1>
 
-Welcome to your new app.
+@if (AppSettings.Value.AuthorizationEndpoint is null)
+{
+    <p>
+        You need to configure the @nameof(Code.AppSettings.AuthorizationEndpoint) in the appsettings.secrets.json file.
+        Finish <a href="https://oauth.school/exercise/introduction/">this</a> tutorial to get an server endpoint.
+    </p>
+}
+else
+{
+    <p>
+        @(nameof(Code.AppSettings.AuthorizationEndpoint)): @AppSettings.Value.AuthorizationEndpoint
+    </p>
+}
+
+@if (AppSettings.Value.ClientId is null)
+{
+    <p>
+        You need to configure the @nameof(Code.AppSettings.ClientId) in the appsettings.secrets.json file.
+        Finish <a href="https://oauth.school/exercise/introduction/">this</a> tutorial to get an client id.
+    </p>
+}
+else
+{
+    <p>
+        @(nameof(Code.AppSettings.ClientId)): @AppSettings.Value.ClientId
+    </p>
+}
+
+@if (AppSettings.Value.ClientSecret is null)
+{
+    <p>
+        You need to configure the @nameof(Code.AppSettings.ClientSecret) in the appsettings.secrets.json file.
+        Finish <a href="https://oauth.school/exercise/introduction/">this</a> tutorial to get an client secret.
+    </p>
+}
+else
+{
+    <p>
+        @(nameof(Code.AppSettings.ClientSecret)): @AppSettings.Value.ClientSecret[..4]@(new string('*', AppSettings.Value.ClientSecret.Length - 4))
+    </p>
+}
+
+
+<button @onclick="Login">Login into OAuth</button>
+
+
+@code {
+
+    private void Login()
+    {
+        throw new NotImplementedException();
+    }
+
+}
