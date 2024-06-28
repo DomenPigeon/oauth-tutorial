@@ -1,6 +1,6 @@
 ﻿namespace OAuthTutorial.Code;
 
-public record RedirectResponse(string Code, string State);
+public record RedirectResponse(string AuthorizationCode, string State);
 
 public class RedirectService
 {

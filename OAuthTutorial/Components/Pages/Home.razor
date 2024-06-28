@@ -122,7 +122,8 @@ else
         await Add(new("Now we can generate the Authorization Request"));
         await Add(new($"For the redirect uri we will use {settings.RedirectUri}"));
 
-        var request = OAuth.GenerateAuthorizationUri(authorizationEndpoint, clientId, codeVerifier, settings.RedirectUri, codeChallenge);
+        var state = Guid.NewGuid().ToString();
+        var request = OAuth.GenerateAuthorizationUri(authorizationEndpoint, clientId, state, settings.RedirectUri, codeChallenge);
 
         await Add(new($"Authorization Request: {request}"));
         await Add(new("Now you can click the link to be redirected to the OAuth server."));
@@ -138,7 +139,13 @@ else
         await Add(new("Now we need to make a POST request to the Token Endpoint"));
         await Task.Delay(2000);
 
-        var postRequest = OAuth.GenerateTokenPostRequest(settings.TokenEndpoint!, clientId, settings.ClientSecret!, response.Code, settings.RedirectUri, codeVerifier);
+        if (response.State != state)
+        {
+            await Add(new("The state is not the same as the one we sent. This is a security issue."));
+            return;
+        }
+
+        var postRequest = OAuth.GenerateTokenPostRequest(settings.TokenEndpoint!, clientId, settings.ClientSecret!, response.AuthorizationCode, settings.RedirectUri, codeVerifier);
         var content = await postRequest.Content!.ReadAsStringAsync();
 
         var serializedRequest = JsonSerializer.Serialize(postRequest, new JsonSerializerOptions { WriteIndented = true });
@@ -155,7 +162,7 @@ else
 
         var token = await tokenResponse.Content.ReadAsStringAsync();
 
-        await Add(new($"Got back token: {token}"));
+        await Add(new($"Got back token: <pre>{token}</pre>"));
         await Add(new("Now you can use the token to access the server."));
     }
 

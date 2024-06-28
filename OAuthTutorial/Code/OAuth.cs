@@ -4,7 +4,7 @@ namespace OAuthTutorial.Code;
 
 public static class OAuth
 {
-    public static Uri GenerateAuthorizationUri(string authorizationEndpoint, string clientId, string codeVerifier, string redirectUri, string codeChallenge)
+    public static Uri GenerateAuthorizationUri(string authorizationEndpoint, string clientId, string state, string redirectUri, string codeChallenge)
     {
         var uriBuilder = new StringBuilder();
 
@@ -12,7 +12,7 @@ public static class OAuth
         uriBuilder.Append('?');
         uriBuilder.Append("response_type=code&");
         uriBuilder.Append($"client_id={clientId}&");
-        uriBuilder.Append($"state={codeVerifier}&");
+        uriBuilder.Append($"state={state}&");
         uriBuilder.Append($"redirect_uri={redirectUri}&");
         uriBuilder.Append($"code_challenge={codeChallenge}&");
         uriBuilder.Append("code_challenge_method=S256");
